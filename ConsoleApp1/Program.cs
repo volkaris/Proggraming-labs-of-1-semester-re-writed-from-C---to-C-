@@ -2,6 +2,9 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Text;
+using System.Xml;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace BitmapExample
@@ -13,9 +16,10 @@ namespace BitmapExample
 		{
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
+
             void SetPixels(ref int height_,ref int lenght_,ref int[,] arr_,ref Bitmap image_)
             {  
-				//Bitmap image_ = new Bitmap(lenght_, height_,PixelFormat.Format32bppRgb);
+				
                 for (int i = 0; i < height_; i++)
                 {
                     for (int j = 0; j < lenght_; j++)
@@ -43,11 +47,10 @@ namespace BitmapExample
                     }
 
                 }
-				//amount_of_pictures++;
-                //image_.Save("image"+Convert.ToString(amount_of_pictures)+".bmp");
+				
             }
     
-           void SandPileMath(ref int height, ref int lenght, ref int[,] arr,ref int amount_of_iteration ,int frequency)
+            void SandPileMath(ref int height, ref int lenght, ref int[,] arr,ref int amount_of_iteration ,int frequency,string output_,int max_iter_)
 			{
             go:
                 for (int i = 0; i < height; i++)
@@ -78,15 +81,18 @@ namespace BitmapExample
                                 arr[i-1, j] += 1;
                             }
                             amount_of_iteration += 1;
-                           
+                            //if (amount_of_iteration<max_iter_)
+                            //{
+                            //    goto end;
+                            //}
                         }
                     }
 
-                    if (amount_of_iteration%frequency==0)
+                    if (amount_of_iteration%frequency==0 && frequency!=0)
                     {
                         Bitmap image__ = new Bitmap(height, lenght, PixelFormat.Format24bppRgb);
                         SetPixels(ref height, ref lenght, ref arr, ref image__);
-                        image__.Save("picture№"+Convert.ToString(amount_of_iteration)+".bmp");
+                        image__.Save(output_+"\\picture№"+Convert.ToString(amount_of_iteration)+".bmp");
                     }
                 }
                 for (int k = 0; k < height; k++)
@@ -99,6 +105,8 @@ namespace BitmapExample
                         }
                     }
                 }
+            end:
+                int x = 1;
             }
 			
             void Print(ref int[,] arr, ref int height_, ref int lenght_)
@@ -112,20 +120,70 @@ namespace BitmapExample
                     Console.WriteLine();
                 }
             }
-           
-            var height__ = 200;
-			var lenght__ = 200;
-            int[,] arr__ = new int[lenght__, height__];
-            arr__[100,100]=40000;
-            const int frequency_ = 10000;
-            int amount_of_iteration_ = 0;
+
+            void ReadFromTSV(string TSVPath, ref int[,] arr___)
+            {
+                StreamReader reader = new StreamReader(TSVPath.Substring(1), Encoding.ASCII);
+                reader.BaseStream.Position = 0;
+                while (true)
+                {
+                    var str = reader.ReadLine();
+                    if (str == null) //достигнут конец файла
+                        break;
+                    string[] arr_1 = str.Split('\t');
+                    //  int[] arr_= {0,0,0};
+
+                    arr___[Convert.ToInt32(arr_1[0]), Convert.ToInt32(arr_1[1])]=Convert.ToInt32(arr_1[2]);
+                }
+            }
             
-            SandPileMath(ref height__, ref lenght__, ref arr__,ref amount_of_iteration_, frequency_);
+            Int32 height__ = 500;
+            Int32 lenght__ = 500;
+            Int32 frequency_ = 20;
+            string output = "D:\\c#\\ThirdLab\\123";
+            Int32 max_iter = 0;
+            int amount_of_iteration_ = 0;
+            string TSV=null;
+            void Parse()
+            {
+                for (var i = 0; i<args.Length; i++)
+                {
+                    if (args[i]=="--lenght" || args[i]=="-l")
+                    {
+                        lenght__=Convert.ToInt32(args[i+1]);
+                    }
+                    else if (args[i]=="--width" || args[i]=="-w")
+                    {
+                        height__=Convert.ToInt32(args[i+1]);
+                    }
+                    else if (args[i]=="--freq" || args[i]=="-f")
+                    {
+                        frequency_=Convert.ToInt32(args[i+1]);
+                    }
+                    else if (args[i]=="--output" || args[i]=="-o")
+                    {
+                        output=args[i+1];
+                    }
+                    else if (args[i]=="--max_iter" || args[i]=="-m")
+                    {
+                        max_iter=Convert.ToInt32(args[i+1]);
+                    }
+                    else if (args[i]=="--input" || args[i]=="-i")
+                    {
+                        TSV=args[i+1];
+                    }
 
+                }
+            }
 
-            Bitmap image___ = new Bitmap(height__, lenght__, PixelFormat.Format24bppRgb);
-            SetPixels(ref height__, ref lenght__, ref arr__, ref image___);
-            image___.Save("this_is_the_last_file.bmp");
+            Parse();
+           
+            int[,] arr__ = new int[lenght__, height__];
+            
+            ReadFromTSV(TSV, ref arr__);
+       
+            SandPileMath(ref height__, ref lenght__, ref arr__,ref amount_of_iteration_, frequency_,output, max_iter);
+        
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
             string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",ts.Hours, ts.Minutes, ts.Seconds,ts.Milliseconds / 10);
