@@ -4,8 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Text;
-using System.Xml;
-using static System.Net.Mime.MediaTypeNames;
+
 
 namespace BitmapExample
 {
@@ -16,7 +15,7 @@ namespace BitmapExample
 		{
             Stopwatch stopWatch = new Stopwatch();
             stopWatch.Start();
-
+            
             void SetPixels(ref int height_,ref int lenght_,ref int[,] arr_,ref Bitmap image_)
             {  
 				
